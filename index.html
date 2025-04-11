@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Market</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: white;
+        background: black;
+      }
+
+      .back-video {
+        position: fixed; /* Changed from absolute to fixed */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+      }
+
+      @media (min-aspect-ratio: 16/9) {
+        .back-video {
+          width: 100%;
+          height: auto;
+        }
+      }
+
+      @media (max-aspect-ratio: 16/9) {
+        .back-video {
+          width: auto;
+          height: 100%;
+        }
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      h1 {
+        background: rgba(165, 16, 16, 0.7);
+        padding: 10px;
+        border-radius: 10px;
+        display: inline-block;
+      }
+
+      .stock-box {
+        background: rgba(0, 0, 0, 0.92);
+        padding: 15px;
+        margin: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+      }
+
+      .stock-box:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(255, 255, 255, 0.4);
+      }
+
+      /* Ensuring page has enough content to scroll */
+      .content {
+        height: 200vh; /* Just for testing scrolling */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <video autoplay loop muted plays-inline class="back-video">
+        <source src="Background1.mp4" type="video/mp4" />
+      </video>
+      <h1>Stock Market Watch</h1>
+      <div id="stocks">Nifty-50</div>
+    </div>
+    <div class="content"></div>
+
+    <script>
+      const stocks = [
+        { symbol: "TCS.NS", name: "Tata Consultancy Services" },
+        { symbol: "INFY.NS", name: "Infosys" },
+        { symbol: "RELIANCE.NS", name: "Reliance Industries" },
+        { symbol: "HDFCBANK.NS", name: "HDFC Bank" },
+        { symbol: "ICICIBANK.NS", name: "ICICI Bank" },
+        { symbol: "KOTAKBANK.NS", name: "Kotak Mahindra Bank" },
+        { symbol: "SBIN.NS", name: "State Bank of India" },
+        { symbol: "HINDUNILVR.NS", name: "Hindustan Unilever" },
+        { symbol: "ITC.NS", name: "ITC Ltd" },
+        { symbol: "BHARTIARTL.NS", name: "Bharti Airtel" },
+        { symbol: "LT.NS", name: "Larsen & Toubro" },
+        { symbol: "AXISBANK.NS", name: "Axis Bank" },
+        { symbol: "ASIANPAINT.NS", name: "Asian Paints" },
+        { symbol: "MARUTI.NS", name: "Maruti Suzuki" },
+        { symbol: "SUNPHARMA.NS", name: "Sun Pharmaceutical" },
+        { symbol: "WIPRO.NS", name: "Wipro" },
+        { symbol: "HCLTECH.NS", name: "HCL Technologies" },
+        { symbol: "BAJFINANCE.NS", name: "Bajaj Finance" },
+        { symbol: "BAJAJFINSV.NS", name: "Bajaj Finserv" },
+        { symbol: "NTPC.NS", name: "NTPC Ltd" },
+        { symbol: "POWERGRID.NS", name: "Power Grid Corporation" },
+        { symbol: "TITAN.NS", name: "Titan Company" },
+        { symbol: "ULTRACEMCO.NS", name: "UltraTech Cement" },
+        { symbol: "GRASIM.NS", name: "Grasim Industries" },
+        { symbol: "JSWSTEEL.NS", name: "JSW Steel" },
+        { symbol: "TATASTEEL.NS", name: "Tata Steel" },
+        { symbol: "ADANIENT.NS", name: "Adani Enterprises" },
+        { symbol: "ADANIPORTS.NS", name: "Adani Ports" },
+        { symbol: "CIPLA.NS", name: "Cipla" },
+        { symbol: "M&M.NS", name: "Mahindra & Mahindra" },
+        { symbol: "EICHERMOT.NS", name: "Eicher Motors" },
+        { symbol: "HEROMOTOCO.NS", name: "Hero MotoCorp" },
+        { symbol: "BAJAJ-AUTO.NS", name: "Bajaj Auto" },
+        { symbol: "INDUSINDBK.NS", name: "IndusInd Bank" },
+        { symbol: "DRREDDY.NS", name: "Dr. Reddy's Laboratories" },
+        { symbol: "DIVISLAB.NS", name: "Divi's Laboratories" },
+        { symbol: "NESTLEIND.NS", name: "Nestle India" },
+        { symbol: "BPCL.NS", name: "Bharat Petroleum" },
+        { symbol: "ONGC.NS", name: "Oil & Natural Gas Corp" },
+        { symbol: "COALINDIA.NS", name: "Coal India" },
+        { symbol: "BRITANNIA.NS", name: "Britannia Industries" },
+        { symbol: "HINDALCO.NS", name: "Hindalco Industries" },
+        { symbol: "APOLLOHOSP.NS", name: "Apollo Hospitals" },
+        { symbol: "SBILIFE.NS", name: "SBI Life Insurance" },
+        { symbol: "HDFCLIFE.NS", name: "HDFC Life Insurance" },
+        { symbol: "TECHM.NS", name: "Tech Mahindra" },
+        { symbol: "UPL.NS", name: "UPL Ltd" },
+      ];
+    
+      const stockContainer = document.getElementById("stocks");
+    
+      function fetchStockPrice(symbol, priceElement) {
+        fetch(`http://localhost:3000/stock/${symbol}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.currentPrice) {
+              priceElement.innerText = `₹${data.currentPrice}`;
+            } else {
+              priceElement.innerText = "N/A";
+            }
+          })
+          .catch(error => {
+            console.error(`Error fetching ${symbol} price:`, error);
+            priceElement.innerText = "Error";
+          });
+      }
+    
+      stocks.forEach((stock) => {
+        const stockBox = document.createElement("div");
+        stockBox.classList.add("stock-box");
+        stockBox.style.display = "flex";  
+        stockBox.style.justifyContent = "space-between"; 
+        stockBox.style.alignItems = "center"; 
+        stockBox.style.border = "1px solid #ccc"; 
+        stockBox.style.padding = "10px"; 
+        stockBox.style.margin = "5px"; 
+        stockBox.style.cursor = "pointer"; 
+    
+        stockBox.onclick = () => window.open(`stock.html?symbol=${stock.symbol}`, "_blank");
+    
+        const stockInfo = document.createElement("div");
+        stockInfo.innerHTML = `<h2>${stock.name}</h2>`;
+    
+        const priceElement = document.createElement("span");
+        priceElement.innerText = "Loading...";  
+        priceElement.style.fontWeight = "bold"; 
+        priceElement.style.color = "green"; 
+    
+        fetchStockPrice(stock.symbol, priceElement);
+    
+        stockBox.appendChild(stockInfo);
+        stockBox.appendChild(priceElement);
+        stockContainer.appendChild(stockBox);
+      });
+    </script>
+    
+    
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1 id="stock-title"></h1>
+    <p><strong>Current Price:</strong> <span id="current-price"></span></p>
+    <p><strong>52-Week High:</strong> <span id="fiftyTwoWeekHigh"></span></p>
+    <p><strong>52-Week Low:</strong> <span id="fiftyTwoWeekLow"></span></p>
+    <canvas id="stockChart"></canvas>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const symbol = urlParams.get("symbol");
+
+        if (symbol) {
+            document.getElementById("stock-title").textContent = `Stock: ${symbol}`;
+
+            fetch(`http://localhost:3000/stock/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.body.innerHTML = `<h1>Error: ${data.error}</h1>`;
+                        return;
+                    }
+
+                    document.getElementById("current-price").textContent = data.currentPrice;
+                    document.getElementById("fiftyTwoWeekHigh").textContent = data.fiftyTwoWeekHigh;
+                    document.getElementById("fiftyTwoWeekLow").textContent = data.fiftyTwoWeekLow;
+
+                    const labels = data.timestamp.map(ts => new Date(ts * 1000).toLocaleDateString());
+                    const prices = data.close;
+
+                    const ctx = document.getElementById("stockChart").getContext("2d");
+                    new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Stock Price",
+                                data: prices,
+                                borderColor: "blue",
+                                borderWidth: 1
+                            }]
+                        }
+                    });
+                })
+                .catch(error => console.error("Error fetching stock data:", error));
+        } else {
+            document.body.innerHTML = `<h1>Error: No stock symbol provided</h1>`;
+        }
+    </script>
+</body>
+</html>
